@@ -1,0 +1,645 @@
+000009 T0000 VOTE S0 0->candidate, term: T0->T1
+Test (PartA): initial election ...
+000014 T0000 VOTE S1 1->candidate, term: T0->T1
+000014 T0000 VOTE S2 2->candidate, term: T0->T1
+000019 T0001 VOTE S2 Already voted for 2
+000019 T0001 VOTE S1 Already voted for 1
+000020 T0001 VOTE S0 Already voted for 0
+000020 T0001 VOTE S0 Already voted for 0
+000020 T0001 VOTE S2 Already voted for 2
+000020 T0001 VOTE S1 Already voted for 1
+001002 T0001 VOTE S0 0->candidate, term: T1->T2
+001004 T0001 LOG1 S1 1->follower, term: T1->T2
+001004 T0002 VOTE S1 Vote for 0
+001004 T0001 LOG1 S2 2->follower, term: T1->T2
+001004 T0002 VOTE S2 Vote for 0
+001004 T0002 LEAD S0 Become Leader in term: T2
+001005 T0002 VOTE S0 Context lost while waiting for RequestVoteReply
+001005 T0002 LOG1 S2 2->follower, term: T2->T2
+001006 T0002 LOG1 S1 1->follower, term: T2->T2
+003017 T0002 LOG1 S2 2->follower, term: T2->T2
+003020 T0002 LOG1 S1 1->follower, term: T2->T2
+005028 T0002 LOG1 S2 2->follower, term: T2->T2
+005031 T0002 LOG1 S1 1->follower, term: T2->T2
+007041 T0002 LOG1 S1 1->follower, term: T2->T2
+007041 T0002 LOG1 S2 2->follower, term: T2->T2
+009053 T0002 LOG1 S2 2->follower, term: T2->T2
+009053 T0002 LOG1 S1 1->follower, term: T2->T2
+011057 T0002 LOG1 S2 2->follower, term: T2->T2
+011057 T0002 LOG1 S1 1->follower, term: T2->T2
+013060 T0002 LOG1 S2 2->follower, term: T2->T2
+013060 T0002 LOG1 S1 1->follower, term: T2->T2
+015071 T0002 LOG1 S1 1->follower, term: T2->T2
+015071 T0002 LOG1 S2 2->follower, term: T2->T2
+017084 T0002 LOG1 S2 2->follower, term: T2->T2
+017093 T0002 LOG1 S1 1->follower, term: T2->T2
+019091 T0002 LOG1 S1 1->follower, term: T2->T2
+019092 T0002 LOG1 S2 2->follower, term: T2->T2
+021096 T0002 LOG1 S1 1->follower, term: T2->T2
+021096 T0002 LOG1 S2 2->follower, term: T2->T2
+023111 T0002 LOG1 S2 2->follower, term: T2->T2
+023111 T0002 LOG1 S1 1->follower, term: T2->T2
+025122 T0002 LOG1 S2 2->follower, term: T2->T2
+025122 T0002 LOG1 S1 1->follower, term: T2->T2
+027134 T0002 LOG1 S1 1->follower, term: T2->T2
+027134 T0002 LOG1 S2 2->follower, term: T2->T2
+029145 T0002 LOG1 S2 2->follower, term: T2->T2
+029146 T0002 LOG1 S1 1->follower, term: T2->T2
+031155 T0002 LOG1 S1 1->follower, term: T2->T2
+031155 T0002 LOG1 S2 2->follower, term: T2->T2
+  ... Passed --   3.1  3   40    4764    0
+031206 T0000 VOTE S0 0->candidate, term: T0->T1
+031207 T0000 VOTE S1 1->candidate, term: T0->T1
+Test (PartA): election after network failure ...
+031207 T0000 VOTE S2 2->candidate, term: T0->T1
+031208 T0001 VOTE S2 Already voted for 2
+031208 T0001 VOTE S1 Already voted for 1
+031210 T0001 VOTE S0 Already voted for 0
+031210 T0001 VOTE S0 Already voted for 0
+032658 T0001 VOTE S1 1->candidate, term: T1->T2
+032664 T0001 LOG1 S2 2->follower, term: T1->T2
+032664 T0002 VOTE S2 Vote for 1
+032664 T0001 LOG1 S0 0->follower, term: T1->T2
+032664 T0002 VOTE S0 Vote for 1
+032665 T0002 LEAD S1 Become Leader in term: T2
+032665 T0002 VOTE S1 Context lost while waiting for RequestVoteReply
+032666 T0002 LOG1 S2 2->follower, term: T2->T2
+032667 T0002 LOG1 S0 0->follower, term: T2->T2
+034682 T0002 LOG1 S2 2->follower, term: T2->T2
+034687 T0002 LOG1 S0 0->follower, term: T2->T2
+037930 T0002 ERRO S1 Send AppendEntries to 2 failed
+039264 T0002 VOTE S0 0->candidate, term: T2->T3
+039271 T0002 LOG1 S2 2->follower, term: T2->T3
+039271 T0003 VOTE S2 Vote for 0
+039273 T0003 LEAD S0 Become Leader in term: T3
+039275 T0003 LOG1 S2 2->follower, term: T3->T3
+041285 T0003 LOG1 S2 2->follower, term: T3->T3
+042717 T0003 LOG2 S2 Term is lower than currentTerm
+042719 T0003 LOG2 S0 Term is lower than currentTerm
+043294 T0003 LOG1 S2 2->follower, term: T3->T3
+043294 T0002 LOG1 S1 1->follower, term: T2->T3
+044718 T0003 LOG1 S1 Leader 1 context lost
+045308 T0003 LOG1 S2 2->follower, term: T3->T3
+045308 T0003 LOG1 S1 1->follower, term: T3->T3
+049180 T0003 ERRO S0 Send AppendEntries to 1 failed
+049465 T0003 VOTE S2 2->candidate, term: T3->T4
+049667 T0003 VOTE S1 1->candidate, term: T3->T4
+052118 T0004 VOTE S2 2->candidate, term: T4->T5
+052780 T0004 VOTE S1 1->candidate, term: T4->T5
+054000 T0005 VOTE S2 2->candidate, term: T5->T6
+055762 T0006 VOTE S2 2->candidate, term: T6->T7
+055947 T0005 ERRO S1 Send RequestVote to peer 2 failed
+056231 T0005 VOTE S1 1->candidate, term: T5->T6
+057450 T0006 VOTE S1 1->candidate, term: T6->T7
+057574 T0007 VOTE S2 2->candidate, term: T7->T8
+058031 T0003 ERRO S0 Send AppendEntries to 2 failed
+058565 T0008 VOTE S2 2->candidate, term: T8->T9
+058582 T0007 VOTE S1 1->candidate, term: T7->T8
+059122 T0003 ERRO S0 Send AppendEntries to 1 failed
+059486 T0009 VOTE S2 2->candidate, term: T9->T10
+060434 T0008 VOTE S1 1->candidate, term: T8->T9
+061616 T0009 VOTE S1 1->candidate, term: T9->T10
+062058 T0010 VOTE S2 2->candidate, term: T10->T11
+063485 T0003 ERRO S0 Send AppendEntries to 2 failed
+063717 T0010 VOTE S1 1->candidate, term: T10->T11
+063919 T0011 ERRO S1 Send RequestVote to peer 2 failed
+063973 T0003 ERRO S0 Send RequestVote to peer 2 failed
+064539 T0011 VOTE S2 2->candidate, term: T11->T12
+065055 T0012 ERRO S2 Send RequestVote to peer 1 failed
+066370 T0003 ERRO S0 Send AppendEntries to 1 failed
+066873 T0011 ERRO S1 Send AppendEntries to 0 failed
+067040 T0011 VOTE S1 1->candidate, term: T11->T12
+067311 T0012 VOTE S2 2->candidate, term: T12->T13
+067314 T0012 LOG1 S1 1->follower, term: T12->T13
+067314 T0013 VOTE S1 Vote for 2
+067315 T0013 LEAD S2 Become Leader in term: T13
+067316 T0013 LOG1 S1 1->follower, term: T13->T13
+069332 T0013 LOG1 S1 1->follower, term: T13->T13
+070252 T0013 ERRO S1 Send RequestVote to peer 2 failed
+071343 T0013 LOG1 S1 1->follower, term: T13->T13
+071808 T0013 ERRO S1 Send RequestVote to peer 0 failed
+072031 T0003 ERRO S0 Send AppendEntries to 2 failed
+072166 T0013 ERRO S1 Send AppendEntries to 2 failed
+072526 T0013 ERRO S2 Send RequestVote to peer 0 failed
+072582 T0003 ERRO S0 Send AppendEntries to 1 failed
+073352 T0013 LOG1 S1 1->follower, term: T13->T13
+073355 T0003 LOG1 S0 0->follower, term: T3->T13
+073426 T0013 LOG1 S0 Leader 0 context lost
+074353 T0013 ERRO S0 Send AppendEntries to 1 failed
+074634 T0013 ERRO S1 Send AppendEntries to 2 failed
+075364 T0013 LOG1 S1 1->follower, term: T13->T13
+075364 T0013 LOG1 S0 0->follower, term: T13->T13
+075630 T0013 ERRO S1 Send RequestVote to peer 0 failed
+076800 T0013 ERRO S1 Send RequestVote to peer 2 failed
+077376 T0013 LOG1 S1 1->follower, term: T13->T13
+077376 T0013 LOG1 S0 0->follower, term: T13->T13
+  ... Passed --   4.6  3  104    8098    0
+077542 T0000 VOTE S0 0->candidate, term: T0->T1
+077542 T0000 VOTE S1 1->candidate, term: T0->T1
+077543 T0000 VOTE S2 2->candidate, term: T0->T1
+077544 T0000 VOTE S3 3->candidate, term: T0->T1
+Test (PartA): multiple elections ...
+077545 T0000 VOTE S4 4->candidate, term: T0->T1
+077545 T0000 VOTE S5 5->candidate, term: T0->T1
+077546 T0000 LOG1 S6 6->follower, term: T0->T1
+077546 T0001 VOTE S6 Vote for 4
+077546 T0001 VOTE S6 Already voted for 4
+077547 T0001 VOTE S6 Already voted for 4
+077547 T0001 VOTE S6 Already voted for 4
+077548 T0001 VOTE S4 Already voted for 4
+077546 T0001 VOTE S0 Already voted for 0
+077548 T0001 VOTE S0 Already voted for 0
+077549 T0001 VOTE S4 Already voted for 4
+077549 T0001 VOTE S5 Already voted for 5
+077549 T0001 VOTE S0 Already voted for 0
+077549 T0001 VOTE S5 Already voted for 5
+077546 T0001 VOTE S1 Already voted for 1
+077551 T0001 VOTE S1 Already voted for 1
+077551 T0001 VOTE S3 Already voted for 3
+077551 T0001 VOTE S1 Already voted for 1
+077547 T0001 VOTE S2 Already voted for 2
+077551 T0001 VOTE S1 Already voted for 1
+077551 T0001 VOTE S2 Already voted for 2
+077552 T0001 VOTE S2 Already voted for 2
+077553 T0001 VOTE S3 Already voted for 3
+078159 T0013 ERRO S0 Send AppendEntries to 1 failed
+078224 T0013 ERRO S1 Send RequestVote to peer 2 failed
+078562 T0013 ERRO S2 Send RequestVote to peer 0 failed
+078740 T0013 ERRO S0 Send AppendEntries to 2 failed
+079258 T0013 ERRO S2 Send RequestVote to peer 1 failed
+079774 T0001 VOTE S2 2->candidate, term: T1->T2
+079789 T0001 LOG1 S3 3->follower, term: T1->T2
+079789 T0002 VOTE S3 Vote for 2
+079792 T0001 LOG1 S0 0->follower, term: T1->T2
+079792 T0002 VOTE S0 Vote for 2
+079796 T0001 LOG1 S1 1->follower, term: T1->T2
+079796 T0002 VOTE S1 Vote for 2
+079796 T0002 LEAD S2 Become Leader in term: T2
+079797 T0001 LOG1 S6 6->follower, term: T1->T2
+079798 T0002 VOTE S6 Vote for 2
+079799 T0002 VOTE S2 Context lost while waiting for RequestVoteReply
+079800 T0002 LOG1 S0 0->follower, term: T2->T2
+079800 T0001 LOG1 S4 4->follower, term: T1->T2
+079800 T0002 VOTE S4 Vote for 2
+079801 T0002 VOTE S2 Context lost while waiting for RequestVoteReply
+079801 T0002 LOG1 S1 1->follower, term: T2->T2
+079802 T0001 LOG1 S5 5->follower, term: T1->T2
+079802 T0002 VOTE S5 Vote for 2
+079802 T0002 VOTE S2 Context lost while waiting for RequestVoteReply
+079803 T0002 LOG1 S4 4->follower, term: T2->T2
+079808 T0002 LOG1 S3 3->follower, term: T2->T2
+079811 T0002 LOG1 S5 5->follower, term: T2->T2
+081006 T0013 ERRO S0 Send AppendEntries to 1 failed
+081807 T0002 LOG1 S1 1->follower, term: T2->T2
+081807 T0002 LOG1 S4 4->follower, term: T2->T2
+081808 T0002 LOG1 S0 0->follower, term: T2->T2
+081808 T0002 LOG1 S6 6->follower, term: T2->T2
+081807 T0002 LOG1 S3 3->follower, term: T2->T2
+081808 T0002 LOG1 S5 5->follower, term: T2->T2
+082077 T0013 ERRO S2 Send RequestVote to peer 0 failed
+082574 T0002 ERRO S1 Send RequestVote to peer 3 failed
+082609 T0013 ERRO S0 Send AppendEntries to 2 failed
+082987 T0013 ERRO S1 Send RequestVote to peer 0 failed
+085147 T0002 VOTE S4 4->candidate, term: T2->T3
+085244 T0002 VOTE S1 1->candidate, term: T2->T3
+085248 T0002 LOG1 S6 6->follower, term: T2->T3
+085248 T0003 VOTE S6 Vote for 1
+085251 T0002 LOG1 S0 0->follower, term: T2->T3
+085251 T0003 VOTE S0 Vote for 1
+085255 T0002 LOG1 S5 5->follower, term: T2->T3
+085255 T0003 VOTE S5 Vote for 1
+085256 T0003 LEAD S1 Become Leader in term: T3
+085257 T0003 LOG1 S6 6->follower, term: T3->T3
+085258 T0003 LOG1 S0 0->follower, term: T3->T3
+085260 T0003 LOG1 S5 5->follower, term: T3->T3
+086816 T0013 ERRO S0 Send AppendEntries to 1 failed
+087269 T0003 LOG1 S6 6->follower, term: T3->T3
+087270 T0003 LOG1 S5 5->follower, term: T3->T3
+087269 T0003 LOG1 S0 0->follower, term: T3->T3
+087342 T0002 VOTE S3 3->candidate, term: T2->T3
+087840 T0003 LOG2 S1 Term is lower than currentTerm
+087840 T0003 LOG2 S0 Term is lower than currentTerm
+087840 T0003 LOG2 S5 Term is lower than currentTerm
+088129 T0003 VOTE S4 4->candidate, term: T3->T4
+089284 T0003 LOG1 S0 0->follower, term: T3->T3
+089286 T0002 LOG1 S2 2->follower, term: T2->T3
+089284 T0003 LOG1 S5 5->follower, term: T3->T3
+089452 T0004 VOTE S4 4->candidate, term: T4->T5
+089848 T0003 LOG1 S2 Leader 2 context lost
+090093 T0003 VOTE S3 3->candidate, term: T3->T4
+091012 T0004 VOTE S3 3->candidate, term: T4->T5
+091114 T0005 ERRO S4 Send RequestVote to peer 2 failed
+091292 T0003 LOG1 S0 0->follower, term: T3->T3
+091292 T0003 LOG1 S5 5->follower, term: T3->T3
+091292 T0003 LOG1 S2 2->follower, term: T3->T3
+091642 T0003 VOTE S6 6->candidate, term: T3->T4
+092396 T0004 ERRO S6 Send RequestVote to peer 1 failed
+092502 T0005 VOTE S4 4->candidate, term: T5->T6
+092504 T0004 LOG1 S6 6->follower, term: T4->T6
+092504 T0006 VOTE S6 Vote for 4
+092508 T0003 LOG1 S0 0->follower, term: T3->T6
+092508 T0006 VOTE S0 Vote for 4
+092526 T0005 LOG1 S3 3->follower, term: T5->T6
+092526 T0006 VOTE S3 Vote for 4
+092527 T0006 LEAD S4 Become Leader in term: T6
+092527 T0006 LOG1 S6 6->follower, term: T6->T6
+092528 T0006 LOG1 S0 0->follower, term: T6->T6
+092528 T0006 LOG1 S3 3->follower, term: T6->T6
+092621 T0006 ERRO S4 Send RequestVote to peer 1 failed
+093542 T0013 ERRO S0 Send AppendEntries to 2 failed
+094242 T0003 ERRO S1 Send AppendEntries to 2 failed
+094415 T0003 VOTE S5 5->candidate, term: T3->T4
+094538 T0006 LOG1 S6 6->follower, term: T6->T6
+094538 T0006 LOG1 S0 0->follower, term: T6->T6
+094539 T0006 LOG1 S3 3->follower, term: T6->T6
+094691 T0013 ERRO S0 Send AppendEntries to 1 failed
+094789 T0013 ERRO S0 Send AppendEntries to 2 failed
+095189 T0013 ERRO S2 Send RequestVote to peer 0 failed
+095275 T0004 VOTE S5 5->candidate, term: T4->T5
+095390 T0006 ERRO S4 Send RequestVote to peer 0 failed
+096052 T0013 ERRO S0 Send AppendEntries to 1 failed
+096071 T0003 ERRO S2 Send AppendEntries to 5 failed
+096176 T0005 VOTE S5 5->candidate, term: T5->T6
+096181 T0006 ERRO S4 Send RequestVote to peer 5 failed
+096363 T0003 ERRO S1 Send AppendEntries to 3 failed
+096423 T0013 ERRO S0 Send AppendEntries to 1 failed
+096537 T0013 ERRO S2 Send RequestVote to peer 1 failed
+096539 T0006 LOG1 S3 3->follower, term: T6->T6
+096539 T0006 LOG1 S0 0->follower, term: T6->T6
+096539 T0006 LOG1 S6 6->follower, term: T6->T6
+097098 T0003 VOTE S2 2->candidate, term: T3->T4
+097312 T0006 LOG2 S6 Term is lower than currentTerm
+097316 T0006 LOG2 S0 Term is lower than currentTerm
+097319 T0004 LOG2 S2 Term is lower than currentTerm
+097437 T0006 ERRO S5 Send RequestVote to peer 0 failed
+097467 T0006 ERRO S4 Send RequestVote to peer 3 failed
+097618 T0006 VOTE S5 5->candidate, term: T6->T7
+098274 T0006 ERRO S3 Send RequestVote to peer 6 failed
+099140 T0004 ERRO S2 Send RequestVote to peer 4 failed
+099317 T0006 LOG2 S6 Term is lower than currentTerm
+099317 T0006 LOG2 S0 Term is lower than currentTerm
+099317 T0004 LOG2 S2 Term is lower than currentTerm
+099648 T0004 VOTE S2 2->candidate, term: T4->T5
+099650 T0006 VOTE S6 Term is lower than currentTerm
+099651 T0005 LOG1 S2 2->follower, term: T5->T6
+099651 T0003 LOG1 S1 1->follower, term: T3->T5
+099651 T0005 VOTE S1 Vote for 2
+099651 T0006 VOTE S0 Term is lower than currentTerm
+099652 T0006 VOTE S2 Context lost while waiting for RequestVoteReply
+099652 T0006 VOTE S2 Context lost while waiting for RequestVoteReply
+099817 T0013 ERRO S0 Send RequestVote to peer 1 failed
+100348 T0007 VOTE S5 5->candidate, term: T7->T8
+100558 T0006 VOTE S6 6->candidate, term: T6->T7
+100561 T0006 LOG1 S0 0->follower, term: T6->T7
+100562 T0007 VOTE S0 Vote for 6
+100561 T0006 LOG1 S2 2->follower, term: T6->T7
+100562 T0007 VOTE S2 Vote for 6
+100562 T0005 LOG1 S1 1->follower, term: T5->T7
+100563 T0007 VOTE S1 Vote for 6
+100563 T0007 LEAD S6 Become Leader in term: T7
+100565 T0007 LOG1 S0 0->follower, term: T7->T7
+100565 T0007 LOG1 S1 1->follower, term: T7->T7
+100566 T0007 LOG1 S2 2->follower, term: T7->T7
+100988 T0013 ERRO S2 Send RequestVote to peer 1 failed
+101231 T0008 VOTE S5 5->candidate, term: T8->T9
+101326 T0007 LOG1 S1 Leader 1 context lost
+101374 T0013 ERRO S1 Send RequestVote to peer 0 failed
+102340 T0006 VOTE S3 3->candidate, term: T6->T7
+102346 T0007 VOTE S6 Already voted for 6
+102355 T0007 VOTE S1 Already voted for 6
+102358 T0007 VOTE S2 Already voted for 6
+102361 T0009 VOTE S5 Term is lower than currentTerm
+102362 T0007 LOG1 S3 3->follower, term: T7->T9
+102561 T0013 ERRO S1 Send AppendEntries to 0 failed
+102566 T0007 LOG1 S1 1->follower, term: T7->T7
+102566 T0009 LOG2 S3 Term is lower than currentTerm
+102566 T0009 LOG2 S5 Term is lower than currentTerm
+102566 T0007 LOG1 S2 2->follower, term: T7->T7
+102598 T0006 ERRO S4 Send AppendEntries to 6 failed
+102777 T0009 VOTE S5 5->candidate, term: T9->T10
+102778 T0013 ERRO S1 Send RequestVote to peer 0 failed
+102779 T0007 LOG1 S1 1->follower, term: T7->T10
+102779 T0010 VOTE S1 Vote for 5
+102779 T0007 LOG1 S2 2->follower, term: T7->T10
+102779 T0010 VOTE S2 Vote for 5
+102779 T0009 LOG1 S3 3->follower, term: T9->T10
+102780 T0010 VOTE S3 Vote for 5
+102780 T0010 LEAD S5 Become Leader in term: T10
+102780 T0007 LOG1 S6 6->follower, term: T7->T10
+102780 T0010 VOTE S6 Vote for 5
+102781 T0010 LOG1 S6 6->follower, term: T10->T10
+102781 T0010 LOG1 S3 3->follower, term: T10->T10
+102782 T0010 LOG1 S1 1->follower, term: T10->T10
+102782 T0010 LOG1 S2 2->follower, term: T10->T10
+102782 T0010 VOTE S5 Context lost while waiting for RequestVoteReply
+103354 T0013 ERRO S0 Send AppendEntries to 2 failed
+103507 T0010 ERRO S5 Send RequestVote to peer 1 failed
+103626 T0013 ERRO S1 Send RequestVote to peer 0 failed
+103688 T0006 ERRO S4 Send RequestVote to peer 3 failed
+104044 T0006 ERRO S4 Send RequestVote to peer 0 failed
+104069 T0010 ERRO S1 Send AppendEntries to 3 failed
+104148 T0013 ERRO S1 Send AppendEntries to 0 failed
+104200 T0010 ERRO S3 Send RequestVote to peer 5 failed
+104260 T0013 ERRO S1 Send RequestVote to peer 2 failed
+104572 T0010 LOG1 S6 Leader 6 context lost
+104573 T0010 ERRO S5 Send RequestVote to peer 3 failed
+104582 T0010 ERRO S6 Send RequestVote to peer 4 failed
+104685 T0010 ERRO S3 Send RequestVote to peer 4 failed
+104792 T0010 LOG1 S6 6->follower, term: T10->T10
+104792 T0010 LOG1 S3 3->follower, term: T10->T10
+104793 T0010 LOG1 S1 1->follower, term: T10->T10
+104793 T0010 LOG1 S2 2->follower, term: T10->T10
+105150 T0013 ERRO S2 Send AppendEntries to 0 failed
+105413 T0013 ERRO S2 Send RequestVote to peer 1 failed
+105764 T0010 ERRO S5 Send RequestVote to peer 1 failed
+105983 T0013 ERRO S0 Send AppendEntries to 1 failed
+106251 T0010 ERRO S5 Send RequestVote to peer 4 failed
+106252 T0013 ERRO S2 Send RequestVote to peer 1 failed
+106405 T0013 ERRO S0 Send AppendEntries to 1 failed
+106405 T0013 ERRO S1 Send RequestVote to peer 2 failed
+106803 T0010 LOG1 S6 6->follower, term: T10->T10
+106803 T0010 LOG1 S3 3->follower, term: T10->T10
+106803 T0010 LOG1 S2 2->follower, term: T10->T10
+106804 T0010 LOG1 S1 1->follower, term: T10->T10
+106994 T0007 VOTE S0 0->candidate, term: T7->T8
+107690 T0013 ERRO S0 Send RequestVote to peer 1 failed
+107698 T0010 ERRO S5 Send RequestVote to peer 2 failed
+107792 T0006 ERRO S4 Send AppendEntries to 5 failed
+108017 T0013 ERRO S0 Send AppendEntries to 2 failed
+108079 T0013 ERRO S0 Send AppendEntries to 1 failed
+108355 T0013 ERRO S0 Send AppendEntries to 2 failed
+108464 T0006 ERRO S4 Send RequestVote to peer 6 failed
+108595 T0010 LOG2 S1 Term is lower than currentTerm
+108595 T0010 LOG2 S6 Term is lower than currentTerm
+108595 T0010 LOG2 S2 Term is lower than currentTerm
+108595 T0010 LOG2 S3 Term is lower than currentTerm
+108853 T0010 ERRO S1 Send AppendEntries to 3 failed
+108867 T0008 VOTE S0 0->candidate, term: T8->T9
+109422 T0013 ERRO S0 Send AppendEntries to 2 failed
+109445 T0010 ERRO S5 Send RequestVote to peer 1 failed
+109628 T0010 ERRO S6 Send AppendEntries to 4 failed
+109786 T0009 ERRO S0 Send RequestVote to peer 5 failed
+109960 T0010 ERRO S3 Send RequestVote to peer 2 failed
+110026 T0010 VOTE S1 1->candidate, term: T10->T11
+110028 T0010 LOG1 S6 6->follower, term: T10->T11
+110028 T0011 VOTE S6 Vote for 1
+110028 T0010 LOG1 S2 2->follower, term: T10->T11
+110028 T0011 VOTE S2 Vote for 1
+110028 T0010 LOG1 S3 3->follower, term: T10->T11
+110028 T0006 LOG1 S4 4->follower, term: T6->T11
+110028 T0011 VOTE S4 Vote for 1
+110028 T0011 VOTE S3 Vote for 1
+110029 T0011 LEAD S1 Become Leader in term: T11
+110030 T0011 VOTE S1 Context lost while waiting for RequestVoteReply
+110030 T0011 LOG1 S3 3->follower, term: T11->T11
+110030 T0011 LOG1 S6 6->follower, term: T11->T11
+110030 T0011 LOG1 S4 4->follower, term: T11->T11
+110030 T0011 LOG1 S2 2->follower, term: T11->T11
+110345 T0011 ERRO S2 Send RequestVote to peer 6 failed
+110441 T0013 ERRO S2 Send RequestVote to peer 0 failed
+110557 T0011 ERRO S1 Send AppendEntries to 4 failed
+110573 T0011 ERRO S6 Send RequestVote to peer 3 failed
+110596 T0011 LOG1 S4 Leader 4 context lost
+110628 T0013 ERRO S2 Send AppendEntries to 0 failed
+110793 T0009 VOTE S0 0->candidate, term: T9->T10
+111244 T0011 ERRO S3 Send RequestVote to peer 1 failed
+111246 T0010 ERRO S5 Send RequestVote to peer 0 failed
+111322 T0013 ERRO S1 Send RequestVote to peer 0 failed
+111418 T0010 ERRO S5 Send AppendEntries to 4 failed
+111421 T0011 ERRO S2 Send AppendEntries to 4 failed
+111426 T0010 ERRO S5 Send RequestVote to peer 6 failed
+111879 T0011 ERRO S4 Send AppendEntries to 5 failed
+112041 T0011 LOG1 S2 2->follower, term: T11->T11
+112041 T0011 LOG1 S3 3->follower, term: T11->T11
+112041 T0011 LOG1 S6 6->follower, term: T11->T11
+112041 T0011 LOG1 S4 4->follower, term: T11->T11
+112100 T0011 ERRO S3 Send RequestVote to peer 0 failed
+112314 T0011 ERRO S4 Send RequestVote to peer 5 failed
+112367 T0013 ERRO S1 Send RequestVote to peer 0 failed
+112597 T0011 ERRO S1 Send AppendEntries to 6 failed
+112749 T0013 ERRO S2 Send RequestVote to peer 1 failed
+112824 T0011 LOG2 S1 Term is lower than currentTerm
+112824 T0011 LOG2 S4 Term is lower than currentTerm
+112824 T0011 LOG2 S3 Term is lower than currentTerm
+112930 T0013 ERRO S2 Send RequestVote to peer 0 failed
+113069 T0013 ERRO S0 Send AppendEntries to 2 failed
+113085 T0011 ERRO S3 Send RequestVote to peer 4 failed
+113283 T0011 ERRO S2 Send AppendEntries to 3 failed
+113306 T0010 VOTE S0 0->candidate, term: T10->T11
+113461 T0011 ERRO S1 Send AppendEntries to 4 failed
+113505 T0011 ERRO S2 Send RequestVote to peer 5 failed
+113550 T0011 ERRO S0 Send RequestVote to peer 3 failed
+113569 T0011 ERRO S2 Send AppendEntries to 0 failed
+113602 T0010 ERRO S5 Send RequestVote to peer 3 failed
+113889 T0013 ERRO S1 Send RequestVote to peer 0 failed
+114051 T0011 LOG1 S3 3->follower, term: T11->T11
+114052 T0011 LOG1 S4 4->follower, term: T11->T11
+114051 T0010 LOG1 S5 5->follower, term: T10->T11
+114417 T0011 VOTE S0 0->candidate, term: T11->T12
+114830 T0011 LOG1 S5 Leader 5 context lost
+116063 T0011 LOG1 S4 4->follower, term: T11->T11
+116063 T0011 LOG1 S5 5->follower, term: T11->T11
+116063 T0011 LOG1 S3 3->follower, term: T11->T11
+116095 T0013 ERRO S2 Send RequestVote to peer 0 failed
+116431 T0011 VOTE S2 2->candidate, term: T11->T12
+116567 T0011 ERRO S4 Send AppendEntries to 1 failed
+116585 T0011 ERRO S1 Send AppendEntries to 0 failed
+116640 T0011 ERRO S1 Send RequestVote to peer 3 failed
+116739 T0012 ERRO S2 Send AppendEntries to 4 failed
+116807 T0012 ERRO S2 Send AppendEntries to 3 failed
+117089 T0011 VOTE S6 6->candidate, term: T11->T12
+117113 T0011 ERRO S4 Send RequestVote to peer 3 failed
+117205 T0011 ERRO S5 Send RequestVote to peer 2 failed
+117371 T0011 ERRO S1 Send AppendEntries to 4 failed
+117430 T0011 ERRO S1 Send RequestVote to peer 2 failed
+117546 T0012 ERRO S0 Send RequestVote to peer 2 failed
+117582 T0012 VOTE S0 0->candidate, term: T12->T13
+117610 T0012 ERRO S2 Send AppendEntries to 1 failed
+117754 T0012 ERRO S2 Send RequestVote to peer 0 failed
+117929 T0013 ERRO S0 Send RequestVote to peer 1 failed
+118067 T0013 LOG2 S0 Term is lower than currentTerm
+118067 T0011 LOG1 S3 3->follower, term: T11->T11
+118067 T0011 LOG1 S5 5->follower, term: T11->T11
+118084 T0013 ERRO S2 Send RequestVote to peer 0 failed
+118476 T0011 ERRO S5 Send RequestVote to peer 1 failed
+118959 T0012 ERRO S2 Send AppendEntries to 6 failed
+119006 T0011 ERRO S4 Send RequestVote to peer 2 failed
+119050 T0012 ERRO S2 Send RequestVote to peer 3 failed
+119164 T0013 ERRO S0 Send RequestVote to peer 5 failed
+119225 T0012 VOTE S6 6->candidate, term: T12->T13
+119309 T0011 ERRO S4 Send AppendEntries to 0 failed
+119472 T0012 VOTE S2 2->candidate, term: T12->T13
+119601 T0011 ERRO S1 Send AppendEntries to 4 failed
+119608 T0011 VOTE S4 4->candidate, term: T11->T12
+119895 T0011 ERRO S5 Send AppendEntries to 2 failed
+119895 T0013 ERRO S6 Send RequestVote to peer 0 failed
+119961 T0013 ERRO S1 Send RequestVote to peer 2 failed
+120011 T0013 ERRO S0 Send RequestVote to peer 4 failed
+120074 T0013 LOG2 S0 Term is lower than currentTerm
+120074 T0011 LOG1 S3 3->follower, term: T11->T11
+120074 T0011 LOG1 S5 5->follower, term: T11->T11
+120106 T0013 VOTE S0 0->candidate, term: T13->T14
+120107 T0011 LOG1 S5 5->follower, term: T11->T14
+120107 T0014 VOTE S5 Vote for 0
+120107 T0011 LOG1 S1 1->follower, term: T11->T14
+120107 T0014 VOTE S1 Vote for 0
+120107 T0011 LOG1 S3 3->follower, term: T11->T14
+120107 T0014 VOTE S3 Vote for 0
+120108 T0014 LEAD S0 Become Leader in term: T14
+120109 T0014 LOG1 S3 3->follower, term: T14->T14
+120109 T0014 LOG1 S1 1->follower, term: T14->T14
+120109 T0014 LOG1 S5 5->follower, term: T14->T14
+120224 T0012 ERRO S4 Send AppendEntries to 1 failed
+120224 T0013 VOTE S2 2->candidate, term: T13->T14
+120431 T0013 ERRO S6 Send RequestVote to peer 0 failed
+120595 T0014 ERRO S5 Send AppendEntries to 2 failed
+120610 T0014 ERRO S0 Send RequestVote to peer 4 failed
+120729 T0012 VOTE S4 4->candidate, term: T12->T13
+120820 T0013 ERRO S0 Send AppendEntries to 2 failed
+120870 T0014 ERRO S0 Send RequestVote to peer 5 failed
+120969 T0014 ERRO S5 Send RequestVote to peer 0 failed
+121316 T0013 ERRO S6 Send RequestVote to peer 2 failed
+121317 T0014 ERRO S1 Send AppendEntries to 2 failed
+121573 T0014 ERRO S1 Send AppendEntries to 6 failed
+121580 T0014 ERRO S0 Send RequestVote to peer 5 failed
+121689 T0014 ERRO S2 Send AppendEntries to 1 failed
+121804 T0014 ERRO S5 Send RequestVote to peer 4 failed
+121895 T0014 ERRO S0 Send RequestVote to peer 2 failed
+122083 T0014 LOG1 S1 Leader 1 context lost
+122102 T0014 ERRO S2 Send RequestVote to peer 5 failed
+122110 T0014 LOG1 S1 1->follower, term: T14->T14
+122110 T0014 LOG1 S3 3->follower, term: T14->T14
+122111 T0014 LOG1 S5 5->follower, term: T14->T14
+122165 T0013 ERRO S4 Send AppendEntries to 5 failed
+122166 T0013 VOTE S6 6->candidate, term: T13->T14
+122224 T0014 ERRO S2 Send RequestVote to peer 6 failed
+122234 T0014 ERRO S2 Send RequestVote to peer 5 failed
+122449 T0014 ERRO S2 Send RequestVote to peer 1 failed
+122534 T0014 VOTE S2 2->candidate, term: T14->T15
+122654 T0014 ERRO S6 Send RequestVote to peer 2 failed
+122860 T0013 ERRO S4 Send AppendEntries to 2 failed
+122902 T0014 ERRO S0 Send RequestVote to peer 6 failed
+123252 T0014 ERRO S1 Send AppendEntries to 6 failed
+123949 T0013 ERRO S2 Send AppendEntries to 0 failed
+123989 T0013 ERRO S2 Send RequestVote to peer 1 failed
+124099 T0014 ERRO S5 Send RequestVote to peer 2 failed
+124111 T0013 VOTE S4 4->candidate, term: T13->T14
+124112 T0014 VOTE S1 Already voted for 0
+124113 T0014 VOTE S3 Already voted for 0
+124113 T0014 VOTE S0 Already voted for 0
+124113 T0014 LOG1 S1 1->follower, term: T14->T14
+124114 T0014 LOG1 S3 3->follower, term: T14->T14
+124114 T0014 LOG1 S4 4->follower, term: T14->T14
+124114 T0014 VOTE S4 Context lost while waiting for RequestVoteReply
+124136 T0014 ERRO S1 Send AppendEntries to 4 failed
+124243 T0015 ERRO S2 Send RequestVote to peer 6 failed
+124330 T0014 ERRO S1 Send AppendEntries to 3 failed
+124655 T0014 ERRO S5 Send RequestVote to peer 1 failed
+124655 T0014 ERRO S0 Send RequestVote to peer 6 failed
+124722 T0015 VOTE S2 2->candidate, term: T15->T16
+124736 T0016 ERRO S2 Send RequestVote to peer 5 failed
+124744 T0016 ERRO S2 Send RequestVote to peer 4 failed
+124754 T0014 ERRO S0 Send RequestVote to peer 4 failed
+124813 T0014 VOTE S6 6->candidate, term: T14->T15
+124813 T0014 ERRO S4 Send AppendEntries to 2 failed
+124953 T0014 ERRO S4 Send RequestVote to peer 2 failed
+124970 T0014 ERRO S4 Send AppendEntries to 2 failed
+125191 T0014 ERRO S5 Send AppendEntries to 0 failed
+125200 T0014 ERRO S0 Send RequestVote to peer 4 failed
+125211 T0014 ERRO S4 Send RequestVote to peer 2 failed
+125393 T0016 ERRO S2 Send RequestVote to peer 1 failed
+125490 T0015 ERRO S6 Send RequestVote to peer 3 failed
+125704 T0014 ERRO S0 Send RequestVote to peer 6 failed
+125797 T0014 ERRO S5 Send AppendEntries to 4 failed
+125837 T0015 ERRO S6 Send RequestVote to peer 4 failed
+125885 T0016 ERRO S2 Send RequestVote to peer 6 failed
+125895 T0016 ERRO S2 Send RequestVote to peer 4 failed
+126009 T0016 ERRO S2 Send AppendEntries to 6 failed
+126009 T0014 ERRO S3 Send RequestVote to peer 2 failed
+126079 T0015 ERRO S6 Send RequestVote to peer 1 failed
+126118 T0014 LOG1 S1 1->follower, term: T14->T14
+126118 T0014 LOG1 S4 4->follower, term: T14->T14
+126118 T0014 LOG1 S3 3->follower, term: T14->T14
+126252 T0014 VOTE S5 5->candidate, term: T14->T15
+126872 T0014 ERRO S1 Send AppendEntries to 6 failed
+127181 T0014 ERRO S4 Send AppendEntries to 3 failed
+127277 T0015 ERRO S5 Send AppendEntries to 3 failed
+127385 T0014 ERRO S4 Send AppendEntries to 1 failed
+127519 T0014 ERRO S1 Send AppendEntries to 4 failed
+127773 T0015 VOTE S6 6->candidate, term: T15->T16
+128082 T0014 ERRO S1 Send AppendEntries to 0 failed
+128122 T0016 LOG2 S6 Term is lower than currentTerm
+128122 T0015 LOG2 S5 Term is lower than currentTerm
+128123 T0014 LOG1 S4 4->follower, term: T14->T14
+128123 T0014 LOG1 S1 1->follower, term: T14->T14
+128122 T0014 LOG1 S3 3->follower, term: T14->T14
+128122 T0016 LOG2 S2 Term is lower than currentTerm
+128190 T0016 VOTE S2 2->candidate, term: T16->T17
+128191 T0014 LOG1 S3 3->follower, term: T14->T17
+128191 T0017 VOTE S3 Vote for 2
+128191 T0014 LOG1 S1 1->follower, term: T14->T17
+128191 T0014 LOG1 S4 4->follower, term: T14->T17
+128191 T0017 VOTE S4 Vote for 2
+128192 T0016 LOG1 S6 6->follower, term: T16->T17
+128192 T0017 VOTE S6 Vote for 2
+128192 T0015 LOG1 S5 5->follower, term: T15->T17
+128192 T0017 VOTE S5 Vote for 2
+128192 T0014 LOG1 S0 0->follower, term: T14->T17
+128192 T0017 VOTE S0 Vote for 2
+128191 T0017 VOTE S1 Vote for 2
+128192 T0017 LEAD S2 Become Leader in term: T17
+128192 T0017 VOTE S2 Context lost while waiting for RequestVoteReply
+128192 T0017 VOTE S2 Context lost while waiting for RequestVoteReply
+128192 T0017 VOTE S2 Context lost while waiting for RequestVoteReply
+128193 T0017 LOG1 S6 6->follower, term: T17->T17
+128193 T0017 LOG1 S0 0->follower, term: T17->T17
+128193 T0017 LOG1 S1 1->follower, term: T17->T17
+128193 T0017 LOG1 S3 3->follower, term: T17->T17
+128194 T0017 LOG1 S5 5->follower, term: T17->T17
+128194 T0017 LOG1 S4 4->follower, term: T17->T17
+128452 T0017 ERRO S4 Send RequestVote to peer 6 failed
+128826 T0017 ERRO S6 Send RequestVote to peer 2 failed
+128957 T0017 ERRO S5 Send RequestVote to peer 2 failed
+129227 T0017 ERRO S4 Send AppendEntries to 0 failed
+129635 T0017 ERRO S3 Send RequestVote to peer 5 failed
+129747 T0013 ERRO S2 Send RequestVote to peer 0 failed
+129803 T0017 ERRO S1 Send AppendEntries to 3 failed
+129936 T0017 ERRO S3 Send RequestVote to peer 5 failed
+130060 T0017 ERRO S2 Send AppendEntries to 4 failed
+130119 T0017 ERRO S5 Send RequestVote to peer 2 failed
+130121 T0017 LOG1 S0 Leader 0 context lost
+130186 T0017 ERRO S2 Send AppendEntries to 6 failed
+130187 T0017 ERRO S5 Send RequestVote to peer 3 failed
+130194 T0017 LOG1 S1 1->follower, term: T17->T17
+130195 T0017 LOG1 S3 3->follower, term: T17->T17
+130194 T0017 LOG1 S6 6->follower, term: T17->T17
+130195 T0017 LOG1 S4 4->follower, term: T17->T17
+130194 T0017 LOG1 S0 0->follower, term: T17->T17
+130195 T0017 LOG1 S5 5->follower, term: T17->T17
+130659 T0017 ERRO S0 Send RequestVote to peer 6 failed
+130659 T0013 ERRO S1 Send RequestVote to peer 2 failed
+130894 T0017 ERRO S5 Send AppendEntries to 6 failed
+130946 T0017 ERRO S6 Send RequestVote to peer 5 failed
+131012 T0017 ERRO S6 Send RequestVote to peer 5 failed
+131067 T0013 ERRO S2 Send RequestVote to peer 1 failed
+131259 T0017 ERRO S0 Send AppendEntries to 6 failed
+131377 T0017 ERRO S0 Send RequestVote to peer 6 failed
+131606 T0017 ERRO S1 Send AppendEntries to 2 failed
+131910 T0017 ERRO S4 Send AppendEntries to 6 failed
+132153 T0013 ERRO S2 Send RequestVote to peer 0 failed
+132200 T0017 LOG1 S1 1->follower, term: T17->T17
+132200 T0017 LOG1 S3 3->follower, term: T17->T17
+132201 T0017 LOG1 S6 6->follower, term: T17->T17
+132201 T0017 LOG1 S5 5->follower, term: T17->T17
+132200 T0017 LOG1 S4 4->follower, term: T17->T17
+132200 T0017 LOG1 S0 0->follower, term: T17->T17
+132254 T0017 ERRO S1 Send AppendEntries to 4 failed
+132287 T0017 ERRO S0 Send RequestVote to peer 3 failed
+132372 T0017 ERRO S1 Send AppendEntries to 2 failed
+132804 T0017 ERRO S4 Send RequestVote to peer 6 failed
+132804 T0017 ERRO S2 Send RequestVote to peer 0 failed
+132855 T0017 ERRO S1 Send AppendEntries to 0 failed
+132906 T0017 ERRO S5 Send AppendEntries to 6 failed
+  ... Passed --   5.6  7  544   44686    0
+PASS
+ok  	course/raft	13.749s
