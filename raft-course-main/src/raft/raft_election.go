@@ -45,6 +45,7 @@ type RequestVoteReply struct {
 	VoteGranted bool
 }
 
+// 接收方调用
 // example RequestVote RPC handler.
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	// Your code here (PartA, PartB).
@@ -150,6 +151,8 @@ func (rf *Raft) startElection(term int) {
 			votes++
 			continue
 		}
+		// 如果不是自己，构造请求参数
+		// 是否要投票给candidate，主要看任期和日志（日志由term和idx唯一确定）
 		args := &RequestVoteArgs{
 			Term:               rf.currentTerm,
 			CandidateId:        rf.me,

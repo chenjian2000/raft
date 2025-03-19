@@ -43,7 +43,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		rf.becomeFollowerLocked(args.Term)
 	}
 	// 2. 判断日志匹配
-	if args.PrevLogIndex > len(rf.log) { // 日志长度不匹配
+	if args.PrevLogIndex >= len(rf.log) { // 日志长度不匹配
 		LOG(rf.me, rf.currentTerm, DLog2, "<- S%d, Reject log, Follower log too short, Len:%d < Prev:%d", args.LeaderId, len(rf.log), args.PrevLogIndex)
 		return
 	}
@@ -105,6 +105,13 @@ func (rf *Raft) startReplication(term int) bool {
 			rf.becomeFollowerLocked(reply.Term)
 			return
 		}
+
+		// 检查上下文是否丢失
+		if rf.contextLostLocked(Leader, term) {
+			LOG(rf.me, rf.currentTerm, DLog, "-> S%d, Context Lost, T%d:Leader->T%d:%s", peer, term, rf.currentTerm, rf.role)
+			return
+		}
+
 		// 处理 reply
 		if !reply.Success {
 			// follower 日志不匹配，回退（直接回退一个term）
@@ -146,7 +153,7 @@ func (rf *Raft) startReplication(term int) bool {
 			LeaderId:     rf.me,
 			PrevLogIndex: prevLogIndex,
 			PrevLogTerm:  prevLogTerm,
-			Entries:      rf.log[rf.nextIndex[peer]:],
+			Entries:      rf.log[prevLogIndex+1:],
 		}
 
 		go replicateToPeer(peer, args)

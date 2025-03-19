@@ -79,8 +79,10 @@ type Raft struct {
 	currentTerm int
 	votedFor    int // -1 means votedFor none
 
-	electionStart   time.Time     // 选举开始时间
-	electionTimeOut time.Duration // 随机化的选举超时时间
+	electionStart time.Time // 选举开始时间
+	// 随机化的选举超时时间
+	// 这个时间对于follower而言，超时就准备成为candidate；对于candidate而言，超时就是选举超时（表明在当前任期内没有成为leader）；对leader而言没有什么意义
+	electionTimeOut time.Duration
 
 	// peer自己的日志
 	log []LogEntry
@@ -210,13 +212,21 @@ func (rf *Raft) Snapshot(index int, snapshot []byte) {
 // term. the third return value is true if this server believes it is
 // the leader.
 func (rf *Raft) Start(command interface{}) (int, int, bool) {
-	index := -1
-	term := -1
-	isLeader := true
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
 
 	// Your code here (PartB).
-
-	return index, term, isLeader
+	if rf.role != Leader {
+		return -1, -1, false
+	}
+	rf.log = append(rf.log, LogEntry{
+		Term:         rf.currentTerm,
+		Command:      command,
+		CommandValid: true,
+	})
+	// return index, term, isLeader
+	LOG(rf.me, rf.currentTerm, DLeader, "Leader accept log [%d]T%d", len(rf.log)-1, rf.currentTerm)
+	return len(rf.log) - 1, rf.currentTerm, true
 }
 
 // the tester doesn't halt goroutines created by Raft after each test,
