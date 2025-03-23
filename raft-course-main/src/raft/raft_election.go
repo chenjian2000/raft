@@ -17,8 +17,7 @@ func (rf *Raft) ifElectionTimeoutLocked() bool {
 
 // 判断谁的日志更新（follower只会投票给 日志比自己新的 candidate）
 func (rf *Raft) isMoreUpToDateLocked(candidateLastIndex, candidateLastTerm int) bool {
-	lastIndex := len(rf.log) - 1
-	lastTerm := rf.log[lastIndex].Term
+	lastIndex, lastTerm := rf.log.last()
 	LOG(rf.me, rf.currentTerm, DVote, "Compare last log, Me: [%d]T%d, Candidate: [%d]T%d", lastIndex, lastTerm, candidateLastIndex, candidateLastTerm)
 	// 首先比较 term
 	if lastTerm != candidateLastTerm {
@@ -146,7 +145,7 @@ func (rf *Raft) startElection(term int) {
 		return
 	}
 	// 向所有节点请求投票
-	l := len(rf.log)
+	lastIndex, lastTerm := rf.log.last()
 	for peer := 0; peer < len(rf.peers); peer++ {
 		if peer == rf.me { // 处理到自己时，投票给自己
 			votes++
@@ -157,8 +156,8 @@ func (rf *Raft) startElection(term int) {
 		args := &RequestVoteArgs{
 			Term:               rf.currentTerm,
 			CandidateId:        rf.me,
-			CandidateLastIndex: l - 1,
-			CandidateLastTerm:  rf.log[l-1].Term,
+			CandidateLastIndex: lastIndex,
+			CandidateLastTerm:  lastTerm,
 		}
 
 		go askVoteFromPeers(peer, args)

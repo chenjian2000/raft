@@ -90,7 +90,7 @@ type Raft struct {
 	electionTimeOut time.Duration
 
 	// peer自己的日志
-	log []LogEntry
+	log *RaftLog
 
 	// 其他peer的日志(只有leader才回用到)
 	nextIndex  []int // 记录每个follower的下一个要发送的日志索
@@ -108,17 +108,6 @@ func (rf *Raft) GetState() (int, bool) {
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
 	return rf.currentTerm, rf.role == Leader
-}
-
-func (rf *Raft) firstIndexFor(term int) int {
-	for i, entry := range rf.log {
-		if entry.Term == term {
-			return i
-		} else if entry.Term > term {
-			break
-		}
-	}
-	return InvalidIndex
 }
 
 /*
@@ -168,7 +157,7 @@ func (rf *Raft) becomeLeaderLocked() {
 	LOG(rf.me, rf.currentTerm, DLeader, "Become Leader in term: T%d", rf.currentTerm)
 	rf.role = Leader
 	for peer := 0; peer < len(rf.peers); peer++ {
-		rf.nextIndex[peer] = len(rf.log)
+		rf.nextIndex[peer] = rf.log.size()
 		rf.matchIndex[peer] = 0
 	}
 }
@@ -179,7 +168,10 @@ func (rf *Raft) becomeLeaderLocked() {
 // that index. Raft should now trim its log as much as possible.
 func (rf *Raft) Snapshot(index int, snapshot []byte) {
 	// Your code here (PartD).
-
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
+	rf.log.doSnapshot(index, snapshot)
+	rf.persistLocked()
 }
 
 // the service using Raft (e.g. a k/v server) wants to start
@@ -202,15 +194,15 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	if rf.role != Leader {
 		return -1, -1, false
 	}
-	rf.log = append(rf.log, LogEntry{
+	rf.log.append(LogEntry{
 		Term:         rf.currentTerm,
 		Command:      command,
 		CommandValid: true,
 	})
 	rf.persistLocked()
 	// return index, term, isLeader
-	LOG(rf.me, rf.currentTerm, DLeader, "Leader accept log [%d]T%d", len(rf.log)-1, rf.currentTerm)
-	return len(rf.log) - 1, rf.currentTerm, true
+	LOG(rf.me, rf.currentTerm, DLeader, "Leader accept log [%d]T%d", rf.log.size()-1, rf.currentTerm)
+	return rf.log.size() - 1, rf.currentTerm, true
 }
 
 // the tester doesn't halt goroutines created by Raft after each test,
@@ -257,7 +249,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	rf.role = Follower
 	rf.currentTerm = 1
 	rf.votedFor = -1
-	rf.log = append(rf.log, LogEntry{})
+	rf.log = NewLog(InvalidIndex, InvalidTerm, nil, nil)
 	rf.matchIndex = make([]int, len(peers))
 	rf.nextIndex = make([]int, len(peers))
 	rf.applyCh = applyCh

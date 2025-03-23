@@ -47,20 +47,20 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	}
 	defer rf.resetElectionTimerLocked() // 只要你认可了这个leader，就重置计时器
 	// 2. 判断日志匹配
-	if args.PrevLogIndex >= len(rf.log) { // 日志长度不够，无法匹配
-		reply.ConflictIndex = len(rf.log) // 告诉 leader 我的日志长度
-		reply.ConflictTerm = InvalidTerm  // 表示是因为日志太短导致的失败
-		LOG(rf.me, rf.currentTerm, DLog2, "<- S%d, Reject log, Follower log too short, Len:%d < Prev:%d", args.LeaderId, len(rf.log), args.PrevLogIndex)
+	if args.PrevLogIndex >= rf.log.size() { // 日志长度不够，无法匹配
+		reply.ConflictIndex = rf.log.size() // 告诉 leader 我的日志长度
+		reply.ConflictTerm = InvalidTerm    // 表示是因为日志太短导致的失败
+		LOG(rf.me, rf.currentTerm, DLog2, "<- S%d, Reject log, Follower log too short, Len:%d < Prev:%d", args.LeaderId, rf.log.size(), args.PrevLogIndex)
 		return
 	}
-	if rf.log[args.PrevLogIndex].Term != args.PrevLogTerm { // 任期冲突
-		reply.ConflictTerm = rf.log[args.PrevLogIndex].Term        // 冲突位置的任期
-		reply.ConflictIndex = rf.firstIndexFor(reply.ConflictTerm) // 该任期的第一条日志的位置
-		LOG(rf.me, rf.currentTerm, DLog2, "<- S%d, Reject log, Follower log term mismatch, Term:%d < Prev:%d", args.LeaderId, rf.log[args.PrevLogIndex].Term, args.PrevLogTerm)
+	if rf.log.at(args.PrevLogIndex).Term != args.PrevLogTerm { // 任期冲突
+		reply.ConflictTerm = rf.log.at(args.PrevLogIndex).Term         // 冲突位置的任期
+		reply.ConflictIndex = rf.log.firstIndexFor(reply.ConflictTerm) // 该任期的第一条日志的位置
+		LOG(rf.me, rf.currentTerm, DLog2, "<- S%d, Reject log, Follower log term mismatch, Term:%d < Prev:%d", args.LeaderId, rf.log.at(args.PrevLogIndex).Term, args.PrevLogTerm)
 		return
 	}
 	// 3. 日志同步
-	rf.log = append(rf.log[:args.PrevLogIndex+1], args.Entries...)
+	rf.log.appendFrom(args.PrevLogIndex+1, args.Entries)
 	rf.persistLocked()
 	reply.Success = true
 	LOG(rf.me, rf.currentTerm, DLog2, "Follower accept logs: (%d, %d]", args.PrevLogIndex, args.PrevLogIndex+len(args.Entries))
@@ -132,7 +132,7 @@ func (rf *Raft) startReplication(term int) bool {
 			if reply.ConflictTerm == InvalidTerm { // follower 日志长度不够，无法匹配
 				rf.nextIndex[peer] = reply.ConflictIndex // 直接回退到 follower 的日志长度
 			} else { // term不匹配
-				firstTermIndex := rf.firstIndexFor(reply.ConflictTerm)
+				firstTermIndex := rf.log.firstIndexFor(reply.ConflictTerm)
 				if firstTermIndex != InvalidIndex { // leader日志中找到了这个任期
 					rf.nextIndex[peer] = firstTermIndex + 1 // 回退到这个任期的下一个位置
 				} else { // leader日志中没有这个任期
@@ -148,7 +148,7 @@ func (rf *Raft) startReplication(term int) bool {
 		rf.nextIndex[peer] = rf.matchIndex[peer] + 1
 		// follower 日志匹配，更新 leader 的 commitIndex
 		majorityMatched := rf.getMajorityMatchedLocked()
-		if majorityMatched > rf.commitIndex && rf.log[majorityMatched].Term == rf.currentTerm {
+		if majorityMatched > rf.commitIndex && rf.log.at(majorityMatched).Term == rf.currentTerm {
 			LOG(rf.me, rf.currentTerm, DApply, "Leader update the commit index %d->%d", rf.commitIndex, majorityMatched)
 			rf.commitIndex = majorityMatched
 			rf.applyCond.Signal() // leader触发“将日志apply到状态机”（条件：超过半数的follower接受了这笔日志，即返回了reply.Success == true）
@@ -162,18 +162,19 @@ func (rf *Raft) startReplication(term int) bool {
 	}
 	for peer := 0; peer < len(rf.peers); peer++ {
 		if peer == rf.me {
-			rf.matchIndex[peer] = len(rf.log) - 1
-			rf.nextIndex[peer] = len(rf.log)
+			rf.matchIndex[peer] = rf.log.size() - 1
+			rf.nextIndex[peer] = rf.log.size()
 			continue
 		}
 		prevLogIndex := rf.nextIndex[peer] - 1
-		prevLogTerm := rf.log[prevLogIndex].Term
+		prevLogTerm := rf.log.at(prevLogIndex).Term
 		args := &AppendEntriesArgs{
 			Term:         term,
 			LeaderId:     rf.me,
 			PrevLogIndex: prevLogIndex,
 			PrevLogTerm:  prevLogTerm,
-			Entries:      rf.log[prevLogIndex+1:],
+			Entries:      rf.log.tail(prevLogIndex + 1),
+			LeaderCommit: rf.commitIndex,
 		}
 
 		go replicateToPeer(peer, args)
