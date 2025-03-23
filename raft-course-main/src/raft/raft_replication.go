@@ -26,6 +26,9 @@ type AppendEntriesArgs struct {
 type AppendEntriesReply struct {
 	Term    int
 	Success bool
+
+	ConflictTerm  int
+	ConflictIndex int
 }
 
 // 接收方调用（follower & candidate）
@@ -42,17 +45,23 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	if args.Term >= rf.currentTerm {
 		rf.becomeFollowerLocked(args.Term)
 	}
+	defer rf.resetElectionTimerLocked() // 只要你认可了这个leader，就重置计时器
 	// 2. 判断日志匹配
-	if args.PrevLogIndex >= len(rf.log) { // 日志长度不匹配
+	if args.PrevLogIndex >= len(rf.log) { // 日志长度不够，无法匹配
+		reply.ConflictIndex = len(rf.log) // 告诉 leader 我的日志长度
+		reply.ConflictTerm = InvalidTerm  // 表示是因为日志太短导致的失败
 		LOG(rf.me, rf.currentTerm, DLog2, "<- S%d, Reject log, Follower log too short, Len:%d < Prev:%d", args.LeaderId, len(rf.log), args.PrevLogIndex)
 		return
 	}
-	if rf.log[args.PrevLogIndex].Term != args.PrevLogTerm { // 日志任期不匹配
+	if rf.log[args.PrevLogIndex].Term != args.PrevLogTerm { // 任期冲突
+		reply.ConflictTerm = rf.log[args.PrevLogIndex].Term        // 冲突位置的任期
+		reply.ConflictIndex = rf.firstIndexFor(reply.ConflictTerm) // 该任期的第一条日志的位置
 		LOG(rf.me, rf.currentTerm, DLog2, "<- S%d, Reject log, Follower log term mismatch, Term:%d < Prev:%d", args.LeaderId, rf.log[args.PrevLogIndex].Term, args.PrevLogTerm)
 		return
 	}
 	// 3. 日志同步
 	rf.log = append(rf.log[:args.PrevLogIndex+1], args.Entries...)
+	rf.persistLocked()
 	reply.Success = true
 	LOG(rf.me, rf.currentTerm, DLog2, "Follower accept logs: (%d, %d]", args.PrevLogIndex, args.PrevLogIndex+len(args.Entries))
 	// 4. 更新commitIndex
@@ -61,7 +70,6 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		rf.commitIndex = args.LeaderCommit
 		rf.applyCond.Signal()
 	}
-	rf.resetElectionTimerLocked() // 收到合法RPC时重置计时器
 }
 
 func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *AppendEntriesReply) bool {
@@ -88,6 +96,14 @@ func (rf *Raft) getMajorityMatchedLocked() int {
 	return tmpIndexes[majorityIdx]
 }
 
+// 返回两个整数中的较小值
+func MinInt(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
 // 发送方调用（leader）
 func (rf *Raft) startReplication(term int) bool {
 	replicateToPeer := func(peer int, args *AppendEntriesArgs) {
@@ -105,30 +121,34 @@ func (rf *Raft) startReplication(term int) bool {
 			rf.becomeFollowerLocked(reply.Term)
 			return
 		}
-
 		// 检查上下文是否丢失
 		if rf.contextLostLocked(Leader, term) {
 			LOG(rf.me, rf.currentTerm, DLog, "-> S%d, Context Lost, T%d:Leader->T%d:%s", peer, term, rf.currentTerm, rf.role)
 			return
 		}
-
 		// 处理 reply
 		if !reply.Success {
-			// follower 日志不匹配，回退（直接回退一个term）
-			idx, term := args.PrevLogIndex, args.PrevLogTerm
-			for idx > 0 && rf.log[idx].Term == term {
-				idx--
+			prevNext := rf.nextIndex[peer]
+			if reply.ConflictTerm == InvalidTerm { // follower 日志长度不够，无法匹配
+				rf.nextIndex[peer] = reply.ConflictIndex // 直接回退到 follower 的日志长度
+			} else { // term不匹配
+				firstTermIndex := rf.firstIndexFor(reply.ConflictTerm)
+				if firstTermIndex != InvalidIndex { // leader日志中找到了这个任期
+					rf.nextIndex[peer] = firstTermIndex + 1 // 回退到这个任期的下一个位置
+				} else { // leader日志中没有这个任期
+					rf.nextIndex[peer] = reply.ConflictIndex // 回退到 follower 中该任期的第一条日志
+				}
 			}
-			rf.nextIndex[peer] = idx + 1
-			LOG(rf.me, rf.currentTerm, DLog2, "Follower reject logs: (%d, %d]", args.PrevLogIndex, args.PrevLogIndex+len(args.Entries))
+			// avoid the late reply move the nextIndex forward again
+			rf.nextIndex[peer] = MinInt(prevNext, rf.nextIndex[peer])
 			return
 		}
-		// follower 日志匹配，更新 matchIndex 和 nextIndex
+		// follower 日志匹配，更新 leader 的 matchIndex 和 nextIndex
 		rf.matchIndex[peer] = args.PrevLogIndex + len(args.Entries)
 		rf.nextIndex[peer] = rf.matchIndex[peer] + 1
-		// follower 日志匹配，更新 commitIndex
+		// follower 日志匹配，更新 leader 的 commitIndex
 		majorityMatched := rf.getMajorityMatchedLocked()
-		if majorityMatched > rf.commitIndex {
+		if majorityMatched > rf.commitIndex && rf.log[majorityMatched].Term == rf.currentTerm {
 			LOG(rf.me, rf.currentTerm, DApply, "Leader update the commit index %d->%d", rf.commitIndex, majorityMatched)
 			rf.commitIndex = majorityMatched
 			rf.applyCond.Signal() // leader触发“将日志apply到状态机”（条件：超过半数的follower接受了这笔日志，即返回了reply.Success == true）

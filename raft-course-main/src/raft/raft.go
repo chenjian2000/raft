@@ -35,6 +35,11 @@ const (
 	replicationInterval time.Duration = 200 * time.Millisecond
 )
 
+const (
+	InvalidIndex int = 0
+	InvalidTerm  int = 0
+)
+
 type Role string
 
 const (
@@ -105,6 +110,17 @@ func (rf *Raft) GetState() (int, bool) {
 	return rf.currentTerm, rf.role == Leader
 }
 
+func (rf *Raft) firstIndexFor(term int) int {
+	for i, entry := range rf.log {
+		if entry.Term == term {
+			return i
+		} else if entry.Term > term {
+			break
+		}
+	}
+	return InvalidIndex
+}
+
 /*
 	状态转换
 */
@@ -118,10 +134,14 @@ func (rf *Raft) becomeFollowerLocked(term int) {
 	}
 	LOG(rf.me, rf.currentTerm, DLog, "%s->follower, term: T%d->T%d", rf.me, rf.currentTerm, term)
 	rf.role = Follower
+	shouldPersit := term != rf.currentTerm
 	if term > rf.currentTerm { // 当前节点已经进入了新的任期
 		rf.votedFor = -1 // 允许在新的任期中重新投票，避免旧的任期的投票影响新的任期
 	}
 	rf.currentTerm = term
+	if shouldPersit {
+		rf.persistLocked()
+	}
 	// follower不需要在角色转换时 重置计时器， follower只在收到合法RPC时重置计时器
 }
 
@@ -134,7 +154,8 @@ func (rf *Raft) becomeCandidateLocked() {
 	LOG(rf.me, rf.currentTerm, DVote, "%s->candidate, term: T%d->T%d", rf.role, rf.currentTerm, rf.currentTerm+1)
 	rf.role = Candidate
 	rf.currentTerm++
-	rf.votedFor = rf.me           // candidate只会投票给自己
+	rf.votedFor = rf.me // candidate只会投票给自己
+	rf.persistLocked()
 	rf.resetElectionTimerLocked() // 重置计时器，然后进行投票
 }
 
@@ -150,44 +171,6 @@ func (rf *Raft) becomeLeaderLocked() {
 		rf.nextIndex[peer] = len(rf.log)
 		rf.matchIndex[peer] = 0
 	}
-}
-
-// save Raft's persistent state to stable storage,
-// where it can later be retrieved after a crash and restart.
-// see paper's Figure 2 for a description of what should be persistent.
-// before you've implemented snapshots, you should pass nil as the
-// second argument to persister.Save().
-// after you've implemented snapshots, pass the current snapshot
-// (or nil if there's not yet a snapshot).
-func (rf *Raft) persist() {
-	// Your code here (PartC).
-	// Example:
-	// w := new(bytes.Buffer)
-	// e := labgob.NewEncoder(w)
-	// e.Encode(rf.xxx)
-	// e.Encode(rf.yyy)
-	// raftstate := w.Bytes()
-	// rf.persister.Save(raftstate, nil)
-}
-
-// restore previously persisted state.
-func (rf *Raft) readPersist(data []byte) {
-	if data == nil || len(data) < 1 { // bootstrap without any state?
-		return
-	}
-	// Your code here (PartC).
-	// Example:
-	// r := bytes.NewBuffer(data)
-	// d := labgob.NewDecoder(r)
-	// var xxx
-	// var yyy
-	// if d.Decode(&xxx) != nil ||
-	//    d.Decode(&yyy) != nil {
-	//   error...
-	// } else {
-	//   rf.xxx = xxx
-	//   rf.yyy = yyy
-	// }
 }
 
 // the service says it has created a snapshot that has
@@ -224,6 +207,7 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 		Command:      command,
 		CommandValid: true,
 	})
+	rf.persistLocked()
 	// return index, term, isLeader
 	LOG(rf.me, rf.currentTerm, DLeader, "Leader accept log [%d]T%d", len(rf.log)-1, rf.currentTerm)
 	return len(rf.log) - 1, rf.currentTerm, true
@@ -271,7 +255,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 
 	// Your initialization code here (PartA, PartB, PartC).
 	rf.role = Follower
-	rf.currentTerm = 0
+	rf.currentTerm = 1
 	rf.votedFor = -1
 	rf.log = append(rf.log, LogEntry{})
 	rf.matchIndex = make([]int, len(peers))
