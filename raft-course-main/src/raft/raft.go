@@ -57,16 +57,30 @@ const (
 // in part PartD you'll want to send other kinds of messages (e.g.,
 // snapshots) on the applyCh, but set CommandValid to false for these
 // other uses.
+/*
+	1. 应用普通日志
+		msg := ApplyMsg{
+		CommandValid: true,
+		Command: "put x 1",
+		CommandIndex: 100,
+	}
+	2. 应用快照
+		msg := ApplyMsg{
+		SnapshotValid: true,
+		Snapshot: snapshotData,
+		SnapshotTerm: 5,
+		SnapshotIndex: 100,
+	}
+*/
 type ApplyMsg struct {
-	CommandValid bool
-	Command      interface{}
-	CommandIndex int
+	CommandValid bool        // 标识这是一个普通的日志条目（而不是快照）
+	Command      interface{} // 日志中包含的实际命令内容（如 Put/Get 操作）
+	CommandIndex int         // 该日志在整个日志序列中的索引位置
 
-	// For PartD:
-	SnapshotValid bool
-	Snapshot      []byte
-	SnapshotTerm  int
-	SnapshotIndex int
+	SnapshotValid bool   // 标识这是一个快照消息（而不是普通日志）
+	Snapshot      []byte // 快照的二进制数据
+	SnapshotTerm  int    // 快照包含的最后一条日志的任期号
+	SnapshotIndex int    // 快照包含的最后一条日志的索引
 }
 
 // A Go object implementing a single Raft peer.
@@ -77,7 +91,6 @@ type Raft struct {
 	me        int                 // this peer's index into peers[] 当前节点在peers数组中的索引
 	dead      int32               // set by Kill()
 
-	// Your data here (PartA, PartB, PartC).
 	// Look at the paper's Figure 2 for a description of what
 	// state a Raft server must maintain.
 	role        Role
@@ -100,6 +113,8 @@ type Raft struct {
 	lastApplied int           // 已应用到状态机的最高日志索引
 	applyCh     chan ApplyMsg // 向应用层发送已提交日志的通道
 	applyCond   *sync.Cond    // 用于通知日志应用的条件变量
+
+	snapPending bool
 }
 
 // return currentTerm and whether this server
@@ -108,6 +123,12 @@ func (rf *Raft) GetState() (int, bool) {
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
 	return rf.currentTerm, rf.role == Leader
+}
+
+func (rf *Raft) GetRaftStateSize() int {
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
+	return rf.persister.RaftStateSize()
 }
 
 /*
@@ -162,18 +183,6 @@ func (rf *Raft) becomeLeaderLocked() {
 	}
 }
 
-// the service says it has created a snapshot that has
-// all info up to and including index. this means the
-// service no longer needs the log through (and including)
-// that index. Raft should now trim its log as much as possible.
-func (rf *Raft) Snapshot(index int, snapshot []byte) {
-	// Your code here (PartD).
-	rf.mu.Lock()
-	defer rf.mu.Unlock()
-	rf.log.doSnapshot(index, snapshot)
-	rf.persistLocked()
-}
-
 // the service using Raft (e.g. a k/v server) wants to start
 // agreement on the next command to be appended to Raft's log. if this
 // server isn't the leader, returns false. otherwise start the
@@ -186,11 +195,13 @@ func (rf *Raft) Snapshot(index int, snapshot []byte) {
 // if it's ever committed. the second return value is the current
 // term. the third return value is true if this server believes it is
 // the leader.
+// Raft 的入口函数
+// 1. 检查当前节点的角色，如果不是leader，则返回false
+// 2. 如果是leader，则将命令追加到日志中，并返回true
 func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
 
-	// Your code here (PartB).
 	if rf.role != Leader {
 		return -1, -1, false
 	}
@@ -254,6 +265,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	rf.nextIndex = make([]int, len(peers))
 	rf.applyCh = applyCh
 	rf.applyCond = sync.NewCond(&rf.mu)
+	rf.snapPending = false
 	// initialize from state persisted before a crash
 	rf.readPersist(persister.ReadRaftState())
 

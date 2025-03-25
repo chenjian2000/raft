@@ -136,14 +136,36 @@ func (rl *RaftLog) String() string {
 	return terms
 }
 
-func (rl *RaftLog) doSnapshot(index int, snapshot []byte) {
+// receive snapshot from app layer in the leader
+func (rl *RaftLog) doSnapInLeader(index int, snapshot []byte) {
 	idx := rl.idx(index)
+
+	// 更新快照信息
 	rl.snapLastIdx = index
 	rl.snapLastTerm = rl.tailLogs[idx].Term
 	rl.snapshot = snapshot
 
-	tmpLog := make([]LogEntry, 0, rl.size()-rl.snapLastIdx)
-	tmpLog = append(tmpLog, LogEntry{Term: rl.snapLastTerm})
-	tmpLog = append(tmpLog, rl.tailLogs[idx+1:]...)
-	rl.tailLogs = tmpLog
+	// 重建日志数组
+	newLog := make([]LogEntry, 0, rl.size()-rl.snapLastIdx)
+	newLog = append(newLog, LogEntry{
+		Term: rl.snapLastTerm,
+	})
+	// 保留index
+	newLog = append(newLog, rl.tailLogs[idx+1:]...)
+	rl.tailLogs = newLog
+}
+
+// isntall snapshot from the leader in the follower
+func (rl *RaftLog) installSnapInFollower(index, term int, snapshot []byte) {
+	rl.snapLastIdx = index
+	rl.snapLastTerm = term
+	rl.snapshot = snapshot
+
+	// make a new log array
+	// just discard all the local log, and use the leader's snapshot
+	newLog := make([]LogEntry, 0, 1)
+	newLog = append(newLog, LogEntry{
+		Term: rl.snapLastTerm,
+	})
+	rl.tailLogs = newLog
 }
