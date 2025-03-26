@@ -13,20 +13,21 @@ import (
 type KVServer struct {
 	mu      sync.Mutex
 	me      int
-	rf      *raft.Raft         // raft实例
-	applyCh chan raft.ApplyMsg // 接收已提交日志的通道
-	dead    int32              // set by Kill()
+	rf      *raft.Raft
+	applyCh chan raft.ApplyMsg
+	dead    int32 // set by Kill()
 
-	maxraftstate int // 触发日志压缩的阈值
+	maxraftstate int // snapshot if log grows this big
 
+	// Your definitions here.
 	lastApplied    int
-	stateMachine   *MemoryKVStateMachine       // KV存储状态机
-	notifyChans    map[int]chan *OpReply       // 通知客户端请求完成的通道
-	duplicateTable map[int64]LastOperationInfo // 用于解决重复请求问题
+	stateMachine   *MemoryKVStateMachine
+	notifyChans    map[int]chan *OpReply
+	duplicateTable map[int64]LastOperationInfo
 }
 
-// 处理客户端Get请求的回调函数
 func (kv *KVServer) Get(args *GetArgs, reply *GetReply) {
+	// Your code here.
 	// 调用 raft，将请求存储到 raft 日志中并进行同步
 	index, _, isLeader := kv.rf.Start(Op{Key: args.Key, OpType: OpGet})
 
@@ -58,14 +59,15 @@ func (kv *KVServer) Get(args *GetArgs, reply *GetReply) {
 
 func (kv *KVServer) requestDuplicated(clientId, seqId int64) bool {
 	info, ok := kv.duplicateTable[clientId]
-	return ok && seqId <= info.SeqId // seqId 小于已经处理的Id，说明是重复请求
+	return ok && seqId <= info.SeqId
 }
 
 func (kv *KVServer) PutAppend(args *PutAppendArgs, reply *PutAppendReply) {
+	// Your code here.
 	// 判断请求是否重复
 	kv.mu.Lock()
 	if kv.requestDuplicated(args.ClientId, args.SeqId) {
-		// 如果是重复请求（重复请求的seqId不会变），直接返回结果
+		// 如果是重复请求，直接返回结果
 		opReply := kv.duplicateTable[args.ClientId].Reply
 		reply.Err = opReply.Err
 		kv.mu.Unlock()
@@ -140,19 +142,23 @@ func (kv *KVServer) killed() bool {
 // StartKVServer() must return quickly, so it should start goroutines
 // for any long-running work.
 func StartKVServer(servers []*labrpc.ClientEnd, me int, persister *raft.Persister, maxraftstate int) *KVServer {
-	// 注册 Op 结构体， 使其可以通过RPC序列化 传输
+	// call labgob.Register on structures you want
+	// Go's RPC library to marshall/unmarshall.
 	labgob.Register(Op{})
 
 	kv := new(KVServer)
 	kv.me = me
 	kv.maxraftstate = maxraftstate
 
-	kv.applyCh = make(chan raft.ApplyMsg)                 // 创建一个通道，用于接收 apply 消息
-	kv.rf = raft.Make(servers, me, persister, kv.applyCh) // 创建一个 Raft 实例
+	// You may need initialization code here.
 
-	kv.dead = 0 // 存活标志
+	kv.applyCh = make(chan raft.ApplyMsg)
+	kv.rf = raft.Make(servers, me, persister, kv.applyCh)
+
+	// You may need initialization code here.
+	kv.dead = 0
 	kv.lastApplied = 0
-	kv.stateMachine = NewMemoryKVStateMachine() // KV 存储状态机
+	kv.stateMachine = NewMemoryKVStateMachine()
 	kv.notifyChans = make(map[int]chan *OpReply)
 	kv.duplicateTable = make(map[int64]LastOperationInfo)
 
@@ -163,13 +169,12 @@ func StartKVServer(servers []*labrpc.ClientEnd, me int, persister *raft.Persiste
 	return kv
 }
 
-// 这是 KVServer 的核心任务处理循环，
-// 负责应用已提交的日志到状态机 or 处理leader的快照
+// 处理 apply 任务
 func (kv *KVServer) applyTask() {
 	for !kv.killed() {
 		select {
 		case message := <-kv.applyCh:
-			if message.CommandValid { // 普通日志
+			if message.CommandValid {
 				kv.mu.Lock()
 				// 如果是已经处理过的消息则直接忽略
 				if message.CommandIndex <= kv.lastApplied {
@@ -181,14 +186,12 @@ func (kv *KVServer) applyTask() {
 				// 取出用户的操作信息
 				op := message.Command.(Op)
 				var opReply *OpReply
-				// 如果是重复操作则直接返回结果
 				if op.OpType != OpGet && kv.requestDuplicated(op.ClientId, op.SeqId) {
 					opReply = kv.duplicateTable[op.ClientId].Reply
 				} else {
 					// 将操作应用状态机中
 					opReply = kv.applyToStateMachine(op)
 					if op.OpType != OpGet {
-						// 记录 非Get 操作
 						kv.duplicateTable[op.ClientId] = LastOperationInfo{
 							SeqId: op.SeqId,
 							Reply: opReply,
@@ -196,7 +199,7 @@ func (kv *KVServer) applyTask() {
 					}
 				}
 
-				// 如果是leader，通知等待的客户端
+				// 将结果发送回去
 				if _, isLeader := kv.rf.GetState(); isLeader {
 					notifyCh := kv.getNotifyChannel(message.CommandIndex)
 					notifyCh <- opReply
@@ -208,7 +211,7 @@ func (kv *KVServer) applyTask() {
 				}
 
 				kv.mu.Unlock()
-			} else if message.SnapshotValid { // 快照请求
+			} else if message.SnapshotValid {
 				kv.mu.Lock()
 				kv.restoreFromSnapshot(message.Snapshot)
 				kv.lastApplied = message.SnapshotIndex
@@ -233,9 +236,7 @@ func (kv *KVServer) applyToStateMachine(op Op) *OpReply {
 }
 
 func (kv *KVServer) getNotifyChannel(index int) chan *OpReply {
-	// 检查是否已经存在该索引的通道
 	if _, ok := kv.notifyChans[index]; !ok {
-		// 如果不存在，则创建一个新的通道
 		kv.notifyChans[index] = make(chan *OpReply, 1)
 	}
 	return kv.notifyChans[index]
@@ -253,7 +254,6 @@ func (kv *KVServer) makeSnapshot(index int) {
 	kv.rf.Snapshot(index, buf.Bytes())
 }
 
-// 从快照中，恢复状态
 func (kv *KVServer) restoreFromSnapshot(snapshot []byte) {
 	if len(snapshot) == 0 {
 		return

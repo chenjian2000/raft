@@ -13,7 +13,7 @@ func NewCtrlerStateMachine() *CtrlerStateMachine {
 }
 
 func (csm *CtrlerStateMachine) Query(num int) (Config, Err) {
-	if num < 0 || num >= len(csm.Configs) {
+	if num < 0 || num >= len(csm.Configs) { // 不合法的num,就返回最新配置
 		return csm.Configs[len(csm.Configs)-1], OK
 	}
 	return csm.Configs[num], OK

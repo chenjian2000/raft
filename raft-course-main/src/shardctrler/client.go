@@ -89,7 +89,6 @@ func (ck *Clerk) Move(shard int, gid int) {
 	args := &MoveArgs{ClientId: ck.clientId, SeqId: ck.seqId}
 	args.Shard = shard
 	args.GID = gid
-
 	for {
 		var reply MoveReply
 		ok := ck.servers[ck.leaderId].Call("ShardCtrler.Move", args, &reply)

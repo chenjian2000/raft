@@ -15,15 +15,12 @@ type ShardCtrler struct {
 	rf      *raft.Raft
 	applyCh chan raft.ApplyMsg
 
-	// Your data here.
-
-	configs []Config // indexed by config num
-
-	dead           int32 // set by Kill()
+	configs        []Config // indexed by config num
+	dead           int32    // set by Kill()
 	lastApplied    int
 	stateMachine   *CtrlerStateMachine
 	notifyChans    map[int]chan *OpReply
-	duplicateTable map[int64]LastOperationInfo
+	duplicateTable map[int64]LastOperationInfo // 只会保存每个client最新的请求记录
 }
 
 func (sc *ShardCtrler) requestDuplicated(clientId, seqId int64) bool {
@@ -32,7 +29,6 @@ func (sc *ShardCtrler) requestDuplicated(clientId, seqId int64) bool {
 }
 
 func (sc *ShardCtrler) Join(args *JoinArgs, reply *JoinReply) {
-	// Your code here.
 	var opReply OpReply
 	sc.command(Op{
 		OpType:   OpJoin,
@@ -45,7 +41,6 @@ func (sc *ShardCtrler) Join(args *JoinArgs, reply *JoinReply) {
 }
 
 func (sc *ShardCtrler) Leave(args *LeaveArgs, reply *LeaveReply) {
-	// Your code here.
 	var opReply OpReply
 	sc.command(Op{
 		OpType:   OpLeave,
@@ -86,7 +81,7 @@ func (sc *ShardCtrler) Query(args *QueryArgs, reply *QueryReply) {
 func (sc *ShardCtrler) command(args Op, reply *OpReply) {
 	sc.mu.Lock()
 	if args.OpType != OpQuery && sc.requestDuplicated(args.ClientId, args.SeqId) {
-		// 如果是重复请求，直接返回结果
+		// 如果是重复请求（由clientId + seqId标识），直接返回结果
 		opReply := sc.duplicateTable[args.ClientId].Reply
 		reply.Err = opReply.Err
 		sc.mu.Unlock()
